@@ -1,33 +1,62 @@
 package model;
 
-import java.math.BigInteger;
-
 public class Star {
-    private String name; // 3 duże litery oraz 4 cyfry
+    private String name;
     private String catalogName; // litera alfabetu greckiego oraz nazwa gwiazdozbioru
-    private String declination; // współrzędne od 0 do 90 stopni dla półkuli północnej xx stopni yy minut zz.zz sekund
-    private String rightAscension; // druga współrzędna od 00 do 24h xx hh yy m zz s
-    private String apparentMagnitude; // min -26.74 max 15.00
-    private String absoluteMagnitude; // M = m − 5· log10r + 5 m - apparentMagnitude r - luminousAgesDistance / 3.26
-    private BigInteger luminousAgesDistance;
+    private Declination declination;
+    private RightAscension rightAscension;
+    private double apparentMagnitude;
+    private double absoluteMagnitude; // M = m − 5· log10r + 5 m - apparentMagnitude r - luminousAgesDistance / 3.26
+    private double luminousAgesDistance;
     private String constellation;
-    private char hemisphere; // N S
-    private BigInteger temperature; // min 2000
-    private int mass; // min 0.1 max 50
+    private String hemisphere;
+    private double temperature;
+    private double mass;
 
-    public Star(String name, String catalogName, String declination, String rightAscension, String apparentMagnitude,
-                String absoluteMagnitude, BigInteger luminousAgesDistance, String constellation, char hemisphere,
-                BigInteger temperature, int mass) {
+    public Star(String name, String catalogName, Declination declination, RightAscension rightAscension,
+                double apparentMagnitude, double luminousAgesDistance,
+                String constellation, double temperature, double mass) {
         this.name = name;
         this.catalogName = catalogName;
         this.declination = declination;
         this.rightAscension = rightAscension;
         this.apparentMagnitude = apparentMagnitude;
-        this.absoluteMagnitude = absoluteMagnitude;
         this.luminousAgesDistance = luminousAgesDistance;
         this.constellation = constellation;
-        this.hemisphere = hemisphere;
         this.temperature = temperature;
         this.mass = mass;
+        setAbsoluteMagnitude(apparentMagnitude, luminousAgesDistance);
+        setHemisphere(declination);
+    }
+
+    private void setHemisphere(Declination declination) {
+        if (declination.getXx() > 0) {
+            this.hemisphere = "NORTH";
+        } else if (declination.getXx() < 0) {
+            this.hemisphere = "SOUTH";
+        } else {
+            this.hemisphere = "BOTH";
+        }
+    }
+
+    private void setAbsoluteMagnitude(double m, double r) {
+        this.absoluteMagnitude = m - 5 * Math.log10(r) + 5;
+    }
+
+    @Override
+    public String toString() {
+        return "Star{" +
+                "name='" + name + '\'' +
+                ", catalogName='" + catalogName + '\'' +
+                ", declination=" + declination +
+                ", rightAscension='" + rightAscension + '\'' +
+                ", apparentMagnitude=" + apparentMagnitude +
+                ", absoluteMagnitude=" + absoluteMagnitude +
+                ", luminousAgesDistance=" + luminousAgesDistance +
+                ", constellation='" + constellation + '\'' +
+                ", hemisphere='" + hemisphere + '\'' +
+                ", temperature=" + temperature + "ºC" +
+                ", mass=" + mass +
+                '}';
     }
 }
