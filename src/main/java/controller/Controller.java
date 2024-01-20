@@ -5,11 +5,11 @@ import model.RightAscension;
 import model.Star;
 import service.FileManager;
 import service.Logger;
+
 import java.util.Scanner;
 
 public class Controller {
     private static Controller instance;
-    private static FileManager fileManager;
     private Scanner scan = new Scanner(System.in);
 
     public static Controller getInstance() {
@@ -21,7 +21,7 @@ public class Controller {
 
     public void runApp() {
         int option = 0;
-        fileManager = new FileManager();
+        FileManager fileManager = new FileManager();
 
         do {
             showInstructions();
@@ -30,11 +30,16 @@ public class Controller {
             } catch (NumberFormatException e) {
                 Logger.INSTANCE.log("Please enter a number.");
             }
-        } while (option <= 0 || option >= 4);
+        } while (option < 0 || option >= 4);
+
             switch (option) {
+                case 0:
+                    System.out.println("Exiting the program...");
+                    System.exit(0);
+
                 case 1:
                     Star s = createNewStar();
-                    System.out.println(s);
+                    fileManager.serializeAndSave(s);
                     break;
                 case 2: // deleteStar(catalogName); TODO
                     break;
@@ -47,6 +52,7 @@ public class Controller {
         System.out.println(
           """
           Welcome to stars manager, what do you want do do?
+          0. Exit
           1. Add new star.
           2. Delete star.
           3. Display all stars.
@@ -56,7 +62,6 @@ public class Controller {
 
     private Star createNewStar() {
         String name = askForStarName();
-        String catalogName = "";
         Declination declination = askForDeclination();
         RightAscension rightAscension = askForRightAscension();
         double apparentMagnitude = askForApparentMagnitude();
@@ -65,7 +70,7 @@ public class Controller {
         double temperature = askForTemperature();
         double mass = askForMass();
 
-        return new Star(name, catalogName, declination, rightAscension, apparentMagnitude, distance,
+        return new Star(name, declination, rightAscension, apparentMagnitude, distance,
                 constellation, temperature, mass);
     }
 
@@ -296,5 +301,4 @@ public class Controller {
         }
         return distance;
     }
-
 }
