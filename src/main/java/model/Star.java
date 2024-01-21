@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Star implements Serializable {
     private static final long serialVersionUID = 598416251500321405L;
-    private transient FileManager fileManager = new FileManager();
+    private FileManager fileManager;
     private String name;
     private String catalogName;
     private Declination declination;
@@ -26,6 +26,7 @@ public class Star implements Serializable {
     public Star(String name, Declination declination, RightAscension rightAscension,
                 double apparentMagnitude, double luminousAgesDistance,
                 String constellation, double temperature, double mass) {
+        this.fileManager = new FileManager();
         this.name = name;
         this.declination = declination;
         this.rightAscension = rightAscension;
@@ -54,29 +55,29 @@ public class Star implements Serializable {
     }
 
     public void setCatalogName() {
+        List<Star> listOfStar = fileManager.getListOfStar();
         int i = 0;
-        List<Star> listOfStar = fileManager.deserializeAndRead();
         if (!listOfStar.isEmpty()) {
             for (Star star : listOfStar) {
-                if (constellation.equals(star.getConstellation())) {
+                if (this.constellation.equals(star.getConstellation())) {
                     i++;
                 }
             }
-            if (apparentMagnitude < findTheBrightestStar()) {
-                catalogName = GreekAlphabet.ALPHA.getGreekLetter(0).concat(" ").concat(constellation);
+            if (this.apparentMagnitude < findTheBrightestStar()) {
+                setCatalogName(GreekAlphabet.getGreekLetter(0).concat(" ").concat(this.constellation));
                 setCatalogIndex(0);
                 for (Star star : listOfStar) {
-                    if (star.getConstellation().equals(constellation)) {
-                        star.catalogName = GreekAlphabet.ALPHA.getGreekLetter(star.getCatalogIndex() + 1).concat(" ").concat(star.constellation);
-                        star.setCatalogIndex(star.getCatalogIndex() + 1);
+                    if (constellation.equals(star.getConstellation())) {
+                        setCatalogName(GreekAlphabet.getGreekLetter(star.getCatalogIndex() + 1).concat(" ").concat(constellation));
+                        setCatalogIndex(star.getCatalogIndex() + 1);
                     }
                 }
             } else {
-                catalogName = GreekAlphabet.ALPHA.getGreekLetter(i).concat(" ").concat(constellation);
+                setCatalogName(GreekAlphabet.getGreekLetter(i).concat(" ").concat(constellation));
                 setCatalogIndex(i);
             }
         } else {
-            catalogName = GreekAlphabet.ALPHA.getGreekLetter(i).concat(" ").concat(constellation);
+            setCatalogName(GreekAlphabet.getGreekLetter(i).concat(" ").concat(constellation));
             setCatalogIndex(i);
         }
     }
@@ -94,7 +95,7 @@ public class Star implements Serializable {
 
     public void deleteStar(String greekLetter, String constellation) {
         Star starToRemove = null;
-        List<Star> listOfStar = fileManager.deserializeAndRead();
+        List<Star> listOfStar = fileManager.getListOfStar();
 
         for (Star star : listOfStar) {
             String catalogName = greekLetter.toUpperCase().concat(" ").concat(constellation);
@@ -103,52 +104,26 @@ public class Star implements Serializable {
                 break;
             }
         }
+
         if (starToRemove != null) {
+            int removedIndex = starToRemove.getCatalogIndex();
             listOfStar.remove(starToRemove);
-        }
-        else {
-            Logger.INSTANCE.log("Star not found");
-            return;
-        }
-        if (starToRemove.getCatalogIndex() == 0) {
-            Star newAlpha = findNewAlphaStar(constellation);
-            if (newAlpha != null)
-            {
-                newAlpha.setCatalogIndex(0);
-                newAlpha.setCatalogName(GreekAlphabet.ALPHA.getGreekLetter(newAlpha.getCatalogIndex()).concat(" ").concat(newAlpha.getConstellation()));
-                for (Star starsToUpdate : listOfStar) {
-                    if (starsToUpdate.getConstellation().equals(constellation) && starsToUpdate.getCatalogIndex() > starToRemove.getCatalogIndex()) {
-                        starsToUpdate.setCatalogName(GreekAlphabet.ALPHA.getGreekLetter(starsToUpdate.getCatalogIndex()).concat(" ").concat(starsToUpdate.getConstellation()));              }
-                }
-            }
-            else
-            {
-                Logger.INSTANCE.log("Star has been removed.");
-            }
+            fileManager.serializeAndSave(listOfStar);
+            updateCatalogNames(listOfStar, constellation, removedIndex);
+            Logger.INSTANCE.log("Star removed successfully.");
         } else {
-            for (Star starsToUpdate : listOfStar) {
-                if (starsToUpdate.getConstellation().equals(constellation) && starsToUpdate.getCatalogIndex() > starToRemove.getCatalogIndex()) {
-                    starsToUpdate.setCatalogIndex(starsToUpdate.getCatalogIndex() - 1);
-                    starsToUpdate.setCatalogName(GreekAlphabet.ALPHA.getGreekLetter(starsToUpdate.getCatalogIndex()).concat(" ").concat(starsToUpdate.getConstellation()));
-                }
-            }
+            Logger.INSTANCE.log("Star not found");
         }
     }
 
-    private Star findNewAlphaStar(String constellation) {
-        Star newAlpha = null;
-        double temp = 15.00;
-        List<Star> listOfStar = fileManager.deserializeAndRead();
-
+    private void updateCatalogNames(List<Star> listOfStar, String constellation, int removedIndex) {
         for (Star star : listOfStar) {
-            if (star.getConstellation().equals(constellation)) {
-                if (star.getApparentMagnitude() < temp) {
-                    temp = star.getApparentMagnitude();
-                    newAlpha = star;
-                }
+            if (star.getConstellation().equals(constellation) && star.getCatalogIndex() > removedIndex) {
+                star.setCatalogIndex(star.getCatalogIndex() - 1);
+                star.setCatalogName(GreekAlphabet.getGreekLetter(star.getCatalogIndex()) + " " + star.getConstellation());
             }
         }
-        return newAlpha;
+        fileManager.serializeAndSave(listOfStar);
     }
 
     public String getConstellation() {
@@ -171,6 +146,10 @@ public class Star implements Serializable {
         return catalogName;
     }
 
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
     public double getLuminousAgesDistance() {
         return luminousAgesDistance;
     }
@@ -185,10 +164,6 @@ public class Star implements Serializable {
 
     public double getMass() {
         return mass;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
     }
 
     @Override

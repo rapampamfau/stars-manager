@@ -24,7 +24,7 @@ public class Controller {
         int option = 0;
         FileManager fileManager = new FileManager();
         String constellation;
-        List<Star> stars = null;
+        List<Star> stars = fileManager.getListOfStar();
 
         do {
             showInstructions();
@@ -42,8 +42,8 @@ public class Controller {
 
                 case 1:
                     Star s = createNewStar();
-                    fileManager.getListOfStar().add(s);
-                    fileManager.serializeAndSave(s);
+                    stars.add(s);
+                    fileManager.serializeAndSave(stars);
                     break;
                 case 2:
                     constellation = askForConstellation();
@@ -67,23 +67,35 @@ public class Controller {
                     }
                     break;
                 case 5:
-                    double minTemp = askForTemperature();
-                    double maxTemp = askForTemperature();
-                    stars = fileManager.findStarsInTemperatureRange(minTemp, maxTemp);
-                    System.out.println("Stars in temperature range: ");
-                    for (Star star : stars) {
-                        System.out.println(star);
-                    }
+                    do {
+                        double minTemp = askForMinTemperature();
+                        double maxTemp = askForMaxTemperature();
+                        if (minTemp < maxTemp) {
+                            stars = fileManager.findStarsInTemperatureRange(minTemp, maxTemp);
+                            System.out.println("Stars in temperature range: ");
+                            for (Star star : stars) {
+                                System.out.println(star);
+                            }
+                            break;
+                        }
+                    } while (true);
                     break;
+
                 case 6:
-                    double minMag = askForApparentMagnitude();
-                    double maxMag = askForApparentMagnitude();
-                    stars = fileManager.findStarsInMagnitudeRange(minMag, maxMag);
-                    System.out.println("Stars in magnitude range: ");
-                    for (Star star : stars) {
-                        System.out.println(star);
-                    }
+                    do {
+                        double minMag = askForMinApparentMagnitude();
+                        double maxMag = askForMaxApparentMagnitude();
+                        if (minMag < maxMag) {
+                            stars = fileManager.findStarsInMagnitudeRange(minMag, maxMag);
+                            System.out.println("Stars in magnitude range: ");
+                            for (Star star : stars) {
+                                System.out.println(star);
+                            }
+                            break;
+                        }
+                    } while (true);
                     break;
+
                 case 7:
                     String hemisphere;
                     do {
@@ -213,6 +225,48 @@ public class Controller {
         return temperature;
     }
 
+    private double askForMinTemperature() {
+        double temperature = 0;
+        boolean flag = true;
+
+        while (flag) {
+            System.out.println("Enter the lower temperature limit: ");
+            try {
+                temperature = Double.parseDouble(scan.next());
+
+                if (temperature < 2000) {
+                    Logger.INSTANCE.log("Minimum temperature cannot be less than 2000ºC");
+                } else {
+                    flag = false;
+                }
+            } catch (NumberFormatException e) {
+                Logger.INSTANCE.log("Please enter a valid temperature as a number.");
+            }
+        }
+        return temperature;
+    }
+
+    private double askForMaxTemperature() {
+        double temperature = 0;
+        boolean flag = true;
+
+        while (flag) {
+            System.out.println("Enter the higher temperature limit: ");
+            try {
+                temperature = Double.parseDouble(scan.next());
+
+                if (temperature < 2000) {
+                    Logger.INSTANCE.log("Max temperature cannot be less than 2000ºC");
+                } else {
+                    flag = false;
+                }
+            } catch (NumberFormatException e) {
+                Logger.INSTANCE.log("Please enter a valid temperature as a number.");
+            }
+        }
+        return temperature;
+    }
+
     private Declination askForDeclination() {
         int xx = 0;
         int yy = 0;
@@ -236,7 +290,7 @@ public class Controller {
         }
 
         while (yflag) {
-            System.out.println("Enter declination minutes (yy or -yy): ");
+            System.out.println("Enter declination minutes (yy): ");
             try {
                 yy = Integer.parseInt(scan.next());
                 if (yy > 60) {
@@ -325,6 +379,52 @@ public class Controller {
 
         while (flag) {
             System.out.println("Enter apparent magnitude of star: ");
+            try {
+                magnitudo = Double.parseDouble(scan.next());
+
+                if (magnitudo < -26.74) {
+                    Logger.INSTANCE.log("Minimum apparent magnitude cannot be less than -26.74");
+                } else if (magnitudo > 15) {
+                    Logger.INSTANCE.log("Maximum apparent magnitude cannot be greater than 15.00");
+                } else {
+                    flag = false;
+                }
+            } catch (NumberFormatException e) {
+                Logger.INSTANCE.log("Please enter a valid magnitude number.");
+            }
+        }
+        return magnitudo;
+    }
+
+    private double askForMinApparentMagnitude() {
+        double magnitudo = 0;
+        boolean flag = true;
+
+        while (flag) {
+            System.out.println("Enter lower apparent magnitude limit: ");
+            try {
+                magnitudo = Double.parseDouble(scan.next());
+
+                if (magnitudo < -26.74) {
+                    Logger.INSTANCE.log("Minimum apparent magnitude cannot be less than -26.74");
+                } else if (magnitudo > 15) {
+                    Logger.INSTANCE.log("Maximum apparent magnitude cannot be greater than 15.00");
+                } else {
+                    flag = false;
+                }
+            } catch (NumberFormatException e) {
+                Logger.INSTANCE.log("Please enter a valid magnitude number.");
+            }
+        }
+        return magnitudo;
+    }
+
+    private double askForMaxApparentMagnitude() {
+        double magnitudo = 0;
+        boolean flag = true;
+
+        while (flag) {
+            System.out.println("Enter higher apparent magnitude limit: ");
             try {
                 magnitudo = Double.parseDouble(scan.next());
 

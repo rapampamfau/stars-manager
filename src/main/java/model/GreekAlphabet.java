@@ -26,10 +26,15 @@ public enum GreekAlphabet {
     PSI("PSI", 23),
     OMEGA("OMEGA", 24);
 
-    GreekAlphabet(String letter,  int index) {
+    private String letter;
+    private int index;
+
+    GreekAlphabet(String letter, int index) {
+        this.letter = letter;
+        this.index = index;
     }
-    public String getGreekLetter(int i ){
-        GreekAlphabet[] greekAlphabets = GreekAlphabet.values();
-        return greekAlphabets[i].toString();
+
+    public static String getGreekLetter(int i) {
+        return GreekAlphabet.values()[i].letter;
     }
 }

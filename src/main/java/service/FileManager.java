@@ -9,36 +9,38 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileManager {
+public class FileManager implements Serializable {
     private static final String FILE_WITH_STARS = "src/main/resources/stars.dat";
-    private List<Star> listOfStar = new ArrayList<>();
+    private List<Star> listOfStar;
 
     public FileManager() {
-        Path filePath = Paths.get("src/main/resources/" + FILE_WITH_STARS);
+        this.listOfStar = deserializeAndRead();
+        if (this.listOfStar == null) {
+            this.listOfStar = new ArrayList<>();
+        }
+
+        Path filePath = Paths.get(FILE_WITH_STARS);
         try {
-            Files.createFile(filePath);
+            if (!Files.exists(filePath)) {
+                Files.createFile(filePath);
+            }
         } catch (IOException e) {
             Logger.INSTANCE.log(e.getMessage());
         }
     }
 
     public List<Star> deserializeAndRead() {
-        try (
-                ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(FILE_WITH_STARS))
-        ) {
+        try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(FILE_WITH_STARS))) {
             return (List<Star>) objectInputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException | ClassCastException e) {
             Logger.INSTANCE.log(e.getMessage());
         }
         return new ArrayList<>();
     }
 
-    public void serializeAndSave(Star star) {
-        try (
-                FileOutputStream fileOutputStream = new FileOutputStream(FILE_WITH_STARS);
-                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)
-        ) {
-            objectOutputStream.writeObject(star);
+    public void serializeAndSave(List<Star> stars) {
+        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(FILE_WITH_STARS))) {
+            objectOutputStream.writeObject(stars);
             Logger.INSTANCE.log("Object serialized and saved to file.");
         } catch (IOException e) {
             Logger.INSTANCE.log(e.getMessage());
@@ -46,20 +48,24 @@ public class FileManager {
     }
 
     public void delete(String greekLetter, String constellation) {
-        for (Star star : listOfStar) {
+        List<Star> stars = deserializeAndRead();
+        for (Star star : stars) {
             star.deleteStar(greekLetter, constellation);
         }
     }
 
     public List<Star> findStarsInConstellation(String constellation) {
         List<Star> starsInConstellation = deserializeAndRead();
-        for (Star star : listOfStar) {
+        List<Star> starsInGivenConstellation = new ArrayList<>();
+
+        for (Star star : starsInConstellation) {
             if (star.getConstellation().equalsIgnoreCase(constellation)) {
-                starsInConstellation.add(star);
+                starsInGivenConstellation.add(star);
             }
         }
-        return starsInConstellation;
+        return starsInGivenConstellation;
     }
+
 
     public List<Star> findStarsWithinDistance(double distanceInParsecs) {
         List<Star> starsWithinDistance = new ArrayList<>();
