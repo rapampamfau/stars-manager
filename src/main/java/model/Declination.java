@@ -1,6 +1,8 @@
 package model;
 
-public class Declination {
+import java.io.Serializable;
+
+public class Declination implements Serializable {
     private final int xx;
     private final int yy;
     private final double zz;

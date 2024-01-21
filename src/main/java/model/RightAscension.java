@@ -1,6 +1,8 @@
 package model;
 
-public class RightAscension {
+import java.io.Serializable;
+
+public class RightAscension implements Serializable {
     private final int xxh;
     private final int yym;
     private final int zzs;
