@@ -6,6 +6,7 @@ import model.Star;
 import service.FileManager;
 import service.Logger;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Controller {
@@ -22,6 +23,8 @@ public class Controller {
     public void runApp() {
         int option = 0;
         FileManager fileManager = new FileManager();
+        String constellation;
+        List<Star> stars = null;
 
         do {
             showInstructions();
@@ -30,7 +33,7 @@ public class Controller {
             } catch (NumberFormatException e) {
                 Logger.INSTANCE.log("Please enter a number.");
             }
-        } while (option < 0 || option >= 4);
+        } while (option < 0 || option >= 9);
 
             switch (option) {
                 case 0:
@@ -39,14 +42,66 @@ public class Controller {
 
                 case 1:
                     Star s = createNewStar();
+                    fileManager.getListOfStar().add(s);
                     fileManager.serializeAndSave(s);
                     break;
                 case 2:
-                    String constellation = askForConstellation();
+                    constellation = askForConstellation();
                     String letter = askForGreekLetter();
                     fileManager.delete(letter, constellation);
                     break;
-                case 3: // displayAllStars(); TODO
+                case 3:
+                    constellation = askForConstellation();
+                    List<Star> starsInConstellation = fileManager.findStarsInConstellation(constellation);
+                    System.out.println("Stars in " + constellation + " constellation: ");
+                    for (Star star : starsInConstellation) {
+                        System.out.println(star);
+                    }
+                    break;
+                case 4:
+                    double distance = askForDistance();
+                    stars = fileManager.findStarsWithinDistance(distance);
+                    System.out.println("Stars in distance range: ");
+                    for (Star star : stars) {
+                        System.out.println(star);
+                    }
+                    break;
+                case 5:
+                    double minTemp = askForTemperature();
+                    double maxTemp = askForTemperature();
+                    stars = fileManager.findStarsInTemperatureRange(minTemp, maxTemp);
+                    System.out.println("Stars in temperature range: ");
+                    for (Star star : stars) {
+                        System.out.println(star);
+                    }
+                    break;
+                case 6:
+                    double minMag = askForApparentMagnitude();
+                    double maxMag = askForApparentMagnitude();
+                    stars = fileManager.findStarsInMagnitudeRange(minMag, maxMag);
+                    System.out.println("Stars in magnitude range: ");
+                    for (Star star : stars) {
+                        System.out.println(star);
+                    }
+                    break;
+                case 7:
+                    String hemisphere;
+                    do {
+                        System.out.println("Enter hemisphere (NORTH/SOUTH/BOTH): ");
+                        hemisphere = scan.next().toUpperCase();
+                    } while (!hemisphere.equals("NORTH") && !hemisphere.equals("SOUTH") && !hemisphere.equals("BOTH"));
+                    stars = fileManager.findStarsInHemisphere(hemisphere);
+                    System.out.println("Stars in " + hemisphere + " hemisphere: ");
+                    for (Star star : stars) {
+                        System.out.println(star);
+                    }
+                    break;
+                case 8:
+                    stars = fileManager.findPotentialSupernovae();
+                    System.out.println("Potential supernovae: ");
+                    for (Star star : stars) {
+                        System.out.println(star);
+                    }
                     break;
             }
     }
@@ -58,7 +113,12 @@ public class Controller {
           0. Exit
           1. Add new star.
           2. Delete star.
-          3. Display all stars.
+          3. Search for stars in constellation.
+          4. Search for stars in distance range.
+          5. Search for stars with temperatures in a given range.
+          6. Search for stars with magnitude within a given range.
+          7. Search for stars from the northern/southern hemisphere.
+          8. Search for stars that are potential supernovae.
           """
         );
     }

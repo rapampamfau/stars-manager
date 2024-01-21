@@ -8,8 +8,8 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Star implements Serializable {
-
-    private FileManager fileManager = new FileManager();
+    private static final long serialVersionUID = 598416251500321405L;
+    private transient FileManager fileManager = new FileManager();
     private String name;
     private String catalogName;
     private Declination declination;
@@ -169,6 +169,22 @@ public class Star implements Serializable {
 
     public String getCatalogName() {
         return catalogName;
+    }
+
+    public double getLuminousAgesDistance() {
+        return luminousAgesDistance;
+    }
+
+    public double getTemperature() {
+        return temperature;
+    }
+
+    public String getHemisphere() {
+        return hemisphere;
+    }
+
+    public double getMass() {
+        return mass;
     }
 
     public void setCatalogName(String catalogName) {
