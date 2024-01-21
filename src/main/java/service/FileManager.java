@@ -45,8 +45,11 @@ public class FileManager {
         }
     }
 
-    private void delete() {
-        //TODO
+    public void delete(String greekLetter, String constellation) {
+        List<Star> stars = deserializeAndRead();
+        for (Star star : stars) {
+            star.deleteStar(greekLetter, constellation);
+        }
     }
 
     public void displayAll() {

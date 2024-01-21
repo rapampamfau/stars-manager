@@ -41,7 +41,10 @@ public class Controller {
                     Star s = createNewStar();
                     fileManager.serializeAndSave(s);
                     break;
-                case 2: // deleteStar(catalogName); TODO
+                case 2:
+                    String constellation = askForConstellation();
+                    String letter = askForGreekLetter();
+                    fileManager.delete(letter, constellation);
                     break;
                 case 3: // displayAllStars(); TODO
                     break;
@@ -300,5 +303,20 @@ public class Controller {
             }
         }
         return distance;
+    }
+
+    private String askForGreekLetter() {
+        String letter;
+        boolean flag = true;
+        do {
+            System.out.println("Enter greek letter of star that you want to delete: ");
+            letter = scan.next();
+            if (!letter.matches("[a-zA-Z]+")) {
+                Logger.INSTANCE.log("The letter must consist only of letters of the English alphabet");
+            } else {
+                flag = false;
+            }
+        } while (flag);
+        return letter.toUpperCase();
     }
 }
